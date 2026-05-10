@@ -18,28 +18,35 @@ export const Instruction = () => {
           </p>
         </div>
         <div className={styles.card}>
-          <p><span>STEP 1: </span>Select an <b>ECG Dataset</b> from the dropdown. Adjust the <b>Duration</b> slider as needed and click <b>"Generate ECG Signal"</b>.</p>
-        </div>
-        <div className={styles.card}>
-          <p><span>STEP 2: </span>
-            {isEqualization
-              ? <>In Algorithm Setup, configure the <b>Filter Order (M)</b> — number of filter taps, and the <b>Step Size (mu)</b> — controls convergence speed.</>
-              : <>In Algorithm Setup, configure the <b>Predictor Order (P)</b> — number of past samples used for prediction, and the <b>Step Size (mu)</b>.</>
-            }
-            {!isLMS && <> Also set <b>Forgetting Factor (lambda)</b> and <b>Initialization (delta)</b> for the RLS filter.</>}
+          <p><span>STEP 1: Signal Setup</span><br />
+            Select an <b>ECG Dataset</b> from the dropdown menu to serve as the input signal. Use the <b>Duration</b> slider to limit the length of the data being analyzed, then click <b>"Generate ECG Signal"</b> to plot the raw signal.
           </p>
         </div>
         <div className={styles.card}>
-          <p><span>STEP 3: </span>Set <b>Number of Samples (N)</b> to control the simulation length. More samples show better convergence behaviour.</p>
+          <p><span>STEP 2: Select Task</span><br />
+            Under the Algorithm Setup, choose your desired <b>Algorithm</b> (LMS or RLS) and the specific <b>Task</b> (Equalization or Prediction).
+          </p>
         </div>
         <div className={styles.card}>
-          <p><span>STEP 4: </span>Click <b>"Apply Algorithm"</b> to run the simulation and render output graphs.</p>
-        </div>
-        <div className={styles.card}>
-          <p><span>STEP 5: </span>
+          <p><span>STEP 3: Configure Filter Parameters</span><br />
             {isEqualization
-              ? <>Observe the <b>MSE vs Iterations</b> plot to see error convergence, and the <b>Weight Convergence</b> plots to see filter tap adaptation.</>
-              : <>Observe the <b>AR Process Signal</b>, the <b>MSE vs Iterations</b> plot showing prediction error, and the <b>Weight Convergence</b> plots.</>
+              ? <>Adjust the <b>Filter Order (M)</b> (the number of filter taps) and the <b>Step Size (mu)</b> or Forgetting Factor to control the convergence speed and stability of the filter.</>
+              : <>Adjust the <b>Predictor Order (P)</b> (the number of past samples used to estimate the current one) and the <b>Step Size (mu)</b> or Forgetting Factor.</>
+            }
+            {!isLMS && <> Pay special attention to the <b>Forgetting Factor (lambda)</b> and <b>Initialization (delta)</b> as they critically affect RLS performance.</>}
+          </p>
+        </div>
+        <div className={styles.card}>
+          <p><span>STEP 4: Set Simulation Length</span><br />
+            Adjust the <b>Number of Samples (N)</b> to control how many data points are processed. A larger number of samples typically provides a clearer view of the algorithm's convergence behaviour.
+          </p>
+        </div>
+        <div className={styles.card}>
+          <p><span>STEP 5: Run and Observe</span><br />
+            Click <b>"Apply Algorithm"</b> to execute the simulation. 
+            {isEqualization
+              ? <> Observe the <b>MSE vs Iterations</b> plot to evaluate error convergence over time, and the <b>Weight Convergence</b> plots to see how individual filter taps adapt.</>
+              : <> Observe the <b>AR Process Signal</b>, the <b>MSE vs Iterations</b> plot for prediction error, and the <b>Weight Convergence</b> plots to see the adaptive weights stabilizing.</>
             }
           </p>
         </div>

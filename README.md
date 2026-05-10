@@ -1,66 +1,58 @@
-# Experiment 3(a): Adaptive Signal Processing Simulation
+# Experiment 3(b): Advanced Adaptive Filtering (LMS & RLS)
 
-This project is a React-based web application that simulates and visualizes adaptive signal processing algorithms for Experiment 3(a). By leveraging modern web technologies, it implements complex mathematical algorithms natively on the client-side, eliminating the need for external backends (like Octave) and ensuring fast, real-time feedback.
+This project is a React-based web application that simulates and visualizes advanced adaptive filtering algorithms for Experiment 3(b). It natively runs sophisticated simulations on the client side, allowing users to compare the performance of LMS (Least Mean Squares) and RLS (Recursive Least Squares) algorithms in both Equalization and Prediction tasks.
 
 ## Datasets Used (ECG)
 
-This experiment uses **three ECG datasets** placed in `public/`:
-
+This experiment provides **three ECG datasets** placed in `public/`:
 - `public/ecg100.csv`
 - `public/ecg200.csv`
 - `public/ecg300.csv`
 
-### Dataset format (what the app expects)
-
-All three CSVs include an ECG time column and at least one ECG signal column:
-
-- **Time**: `time_sec` (seconds)
-- **Signal**: `ECG_I` (raw ECG)
-- **Optional**: `ECG_I_filtered` (a pre-filtered ECG column included in the files)
-
-### How the datasets are used in the app (and why)
-
-- **Where you select them**: In the UI under **Signal Setup → Select ECG Dataset**.
-- **What happens after selection**: The CSV is downloaded and parsed in the browser, and the time axis is normalized to start at \(t=0\).
-- **What gets plotted**: The app plots `ECG_I` as the primary channel.
-- **Why these datasets are used here**:
-  - They provide a **real sampled ECG waveform** so the filtering/noise modules can be demonstrated on realistic signals.
-  - They allow you to compare how different recordings behave under the same filtering/processing settings.
+### How the datasets are used and why
+- **Selection**: Users can load these datasets to observe standard waveforms in the application interface.
+- **Why they are included**: While the equalization and prediction algorithms generate synthetic sequences to mathematically demonstrate convergence, the ECG data provides a baseline real-world signal context for the simulation environment.
 
 ## Implemented Algorithms
 
-### 1. Autoregressive (AR) Process via LMS (Least Mean Squares)
-This algorithm simulates a 2nd-order Autoregressive (AR) process and applies an LMS adaptive filter to iteratively estimate the optimal filter coefficients. 
+Experiment 3(b) focuses on comparing two primary adaptive algorithms across two distinct applications.
 
-- **Key Parameters:** Number of Samples ($N$), Initial Weights ($u_1, u_2$), and Step Size/Learning Rate ($\mu$).
-- **Visualizations:**
-  - **Mean Square Error (MSE):** Tracks the convergence of the algorithm by plotting the squared error over each iteration.
-  - **Random Walk of Weights ($w_1$ & $w_2$):** Displays the trajectory of the estimated filter weights as they adjust and converge toward their optimal theoretical values.
+### Algorithms
+1. **LMS (Least Mean Squares)**: 
+   - **How it works**: Updates filter weights iteratively based on the instantaneous gradient of the squared error. 
+   - **Why we use it**: It is highly computationally efficient and simple to implement, though it typically requires more iterations to converge.
+2. **RLS (Recursive Least Squares)**:
+   - **How it works**: Updates filter weights by recursively minimizing a weighted linear least squares cost function relating to the input signals. It utilizes a correlation matrix inverse calculation at every step.
+   - **Why we use it**: RLS offers significantly faster convergence and better tracking of time-varying signals compared to LMS, albeit at a higher computational cost.
 
-#### How ARP (LMS) is used here (and why)
+### Applications (Tasks)
+1. **Channel Equalization**:
+   - **How it works**: The algorithm attempts to reverse the distortion introduced by a communication channel (modeled as a simple FIR filter). It receives a distorted signal and adapts its weights to reconstruct the original transmitted symbols.
+   - **Why we use it**: It's a critical application in telecommunications to remove inter-symbol interference (ISI) and accurately decode received messages.
+2. **Signal Prediction**:
+   - **How it works**: The algorithm uses a history of past samples to predict the current/future sample of an Autoregressive (AR) process.
+   - **Why we use it**: Signal prediction is widely used in speech encoding, economic forecasting, and noise cancellation. It demonstrates how an adaptive filter can learn the underlying structure of a correlated signal.
 
-- **Where you run it**: **Algorithm Setup → Algorithm: AR Process (LMS) → Apply Algorithm**
-- **What it uses as input**: The AR process is a **synthetic signal model** (not the ECG CSV). You control \(N\), the initial weights \((u_1, u_2)\), and step size \(\mu\).
-- **Why it’s included**: It demonstrates **adaptive filtering and convergence behavior** (MSE decreasing, weights approaching optimal values), which is central to adaptive signal processing.
+## Visualizations: What the Charts Explain
 
-### 2. MVDR (Minimum Variance Distortionless Response) Beamformer
-The MVDR Beamformer is a spatial filtering technique used in antenna arrays. It enhances a desired signal arriving from a specific Direction of Arrival (DOA) while actively suppressing interference from other directions.
+For every algorithm and task combination, the simulation generates detailed charts to visualize the mathematical processes:
 
-- **Key Parameters:** Number of Antennas ($N$), DOA of Signal ($\theta_s$), DOA of Interference ($\theta_i$), Number of Snapshots, Signal-to-Noise Ratio (SNR), Interference-to-Noise Ratio (INR), and Monte Carlo Runs.
-- **Visualizations:**
-  - **Beam Pattern (Magnitude vs Angle):** Plots the array's spatial response in decibels (dB). It demonstrates the algorithm's effectiveness by showing a peak gain at the desired signal's direction and deep nulls at the interference directions.
+1. **Original vs. Predicted/Equalized Signal:**
+   - **What it shows**: An overlay of the raw signal and the signal output by the filter.
+   - **What it explains**: Visually demonstrates the accuracy of the algorithm. If the predicted wave closely hugs the original wave, the filter is successfully anticipating the signal behavior based on past samples.
 
-#### How MVDR is used here (and why)
+2. **MSE (Mean Square Error) vs. Iterations:**
+   - **What it shows**: The squared error between the filter's output and the desired signal at every single sample step.
+   - **What it explains**: This is the fundamental "learning curve" of the filter. A steep drop means the algorithm learns quickly. By comparing LMS and RLS, you will clearly see that RLS achieves a near-zero MSE almost instantly, whereas LMS slopes down gradually.
 
-- **Where you run it**: **Algorithm Setup → Algorithm: MVDR Beamformer → Apply Algorithm**
-- **What it uses as input**: A simulated array/snapshot model driven by your parameters (antennas, DOAs, snapshots, SNR/INR, Monte Carlo runs). Like ARP, it does **not** depend on the ECG CSV.
-- **Why it’s included**: MVDR is a classic adaptive/spatial filtering method. In this experiment it demonstrates **interference suppression** and how parameter choices shape the **beam pattern** (main lobe and nulls).
+3. **Weight Convergence (Filter Taps):**
+   - **What it shows**: A series of lines tracing the dynamic adjustment of every individual filter tap (weight) over time.
+   - **What it explains**: Shows the internal mechanics of the adaptation. The weights start at zero and curve until they flatten out (converge). Fast convergence indicates a highly responsive algorithm, while noisy, jittery lines indicate instability or a step-size that is too large.
 
 ## Technologies Used
-* **React & Vite**: Provides a fast and responsive user interface component architecture.
-* **Math.js**: Handles the mathematical operations and array manipulations required for the signal processing algorithms.
-* **Chart.js & React-Chartjs-2**: Used to render the dynamic, real-time charts for data visualization.
-* **PapaParse**: Used to download and parse the CSV datasets in the browser.
+* **React & Vite**: Fast UI component architecture.
+* **Chart.js**: High-performance, real-time charting for MSE and weight tracking.
+* **PapaParse**: Client-side CSV data handling.
 
 ## Getting Started
 

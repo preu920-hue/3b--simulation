@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { SimulationContext } from "../../context/SimulationContext";
 import styles from "./rightPanel.module.css";
 import Swal from "sweetalert2";
@@ -7,6 +7,7 @@ import {
   runLMS_Prediction,
   runRLS_Equalization,
   runRLS_Prediction,
+  buildDeterministicSeed,
 } from "../../utils/algorithms";
 
 export const RightPanel = () => {
@@ -32,6 +33,7 @@ export const RightPanel = () => {
   const [rlsDelta, setRlsDelta] = useState(0.1);
   const [rlsN, setRlsN] = useState(500);
   const [rlsP, setRlsP] = useState(4);
+  const lastRunRef = useRef({ key: "", payload: null });
 
   useEffect(() => {
     if (prevPathRef.current !== csvFilePath) {
@@ -57,19 +59,43 @@ export const RightPanel = () => {
       Swal.fire({ icon: "info", title: "Oops...", text: "Please generate ECG signal first!" });
       return;
     }
+    const runConfig = {
+      selectedAlgo,
+      selectedMode,
+      lmsM,
+      lmsMu,
+      lmsN,
+      lmsP,
+      rlsM,
+      rlsLambda,
+      rlsDelta,
+      rlsN,
+      rlsP,
+    };
+    const runKey = JSON.stringify(runConfig);
+    if (lastRunRef.current.key === runKey && lastRunRef.current.payload) {
+      setAlgoResults(lastRunRef.current.payload);
+      return;
+    }
+    const runSeed = buildDeterministicSeed(runConfig);
     let results;
+    let payload = null;
     if (selectedAlgo === "LMS" && selectedMode === "Equalization") {
-      results = runLMS_Equalization(lmsN, lmsM, lmsMu);
-      setAlgoResults({ type: "LMS_EQ", label: "LMS Equalization", data: results });
+      results = runLMS_Equalization(lmsN, lmsM, lmsMu, runSeed);
+      payload = { type: "LMS_EQ", label: "LMS Equalization", data: results };
     } else if (selectedAlgo === "LMS" && selectedMode === "Prediction") {
-      results = runLMS_Prediction(lmsN, lmsP, lmsMu);
-      setAlgoResults({ type: "LMS_PRED", label: "LMS Prediction", data: results });
+      results = runLMS_Prediction(lmsN, lmsP, lmsMu, runSeed);
+      payload = { type: "LMS_PRED", label: "LMS Prediction", data: results };
     } else if (selectedAlgo === "RLS" && selectedMode === "Equalization") {
-      results = runRLS_Equalization(rlsN, rlsM, rlsLambda, rlsDelta);
-      setAlgoResults({ type: "RLS_EQ", label: "RLS Equalization", data: results });
+      results = runRLS_Equalization(rlsN, rlsM, rlsLambda, rlsDelta, runSeed);
+      payload = { type: "RLS_EQ", label: "RLS Equalization", data: results };
     } else if (selectedAlgo === "RLS" && selectedMode === "Prediction") {
-      results = runRLS_Prediction(rlsN, rlsP, rlsLambda, rlsDelta);
-      setAlgoResults({ type: "RLS_PRED", label: "RLS Prediction", data: results });
+      results = runRLS_Prediction(rlsN, rlsP, rlsLambda, rlsDelta, runSeed);
+      payload = { type: "RLS_PRED", label: "RLS Prediction", data: results };
+    }
+    if (payload) {
+      lastRunRef.current = { key: runKey, payload };
+      setAlgoResults(payload);
     }
   };
 

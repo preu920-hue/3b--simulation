@@ -37,7 +37,7 @@ export const SimulationProvider = ({ children }) => {
             ? headers.indexOf("time_sec")
             : headers.indexOf("Time");
         if (timeIdx === -1) return;
-        const colorsName = ["#ff4d4d","#4da6ff","#66ff66","#ffcc00","#cc66ff","#00cccc"];
+        const colorsName = ["#4da6ff","#ff4d4d","#66ff66","#ffcc00","#cc66ff","#00cccc"];
         setColors(colorsName);
         const hasECG = headers.includes("ECG_I");
         const channelNames = hasECG ? ["ECG_I"] : [];
