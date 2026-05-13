@@ -19,6 +19,9 @@ export const RightPanel = () => {
     selectedAlgo, selectedMode,
     setAlgoResults,
     setSelectedMode, setSelectedAlgo,
+    noise,
+    setNoise,
+    setApplyNoiseTrigger,
   } = useContext(SimulationContext);
 
   // LMS params
@@ -38,9 +41,26 @@ export const RightPanel = () => {
   useEffect(() => {
     if (prevPathRef.current !== csvFilePath) {
       setAlgoResults(null);
+      setApplyNoiseTrigger(false);
       prevPathRef.current = csvFilePath;
     }
-  }, [csvFilePath, prevPathRef, setAlgoResults]);
+  }, [csvFilePath, prevPathRef, setAlgoResults, setApplyNoiseTrigger]);
+
+  const noiseTrigger = () => {
+    if (!generateECG) {
+      Swal.fire({ icon: "info", title: "Oops...", text: "Please generate ECG signal first!" });
+      return;
+    }
+    if (!noise.baseline && !noise.powerline && !noise.emg) {
+      Swal.fire({
+        icon: "info",
+        title: "Oops...",
+        text: "Please select at least one noise type!",
+      });
+      return;
+    }
+    setApplyNoiseTrigger(true);
+  };
 
   const handleAlgoChange = (e) => {
     const algo = String(e.target.value);
@@ -123,6 +143,46 @@ export const RightPanel = () => {
           <input type="range" min="1" max="70" value={time} onChange={(e) => setTime(Number(e.target.value))} />
           <label>Sampling Rate: <span>{originalFs} Hz</span></label>
           <button onClick={() => setGenerateECG(true)}>Generate ECG Signal</button>
+        </div>
+
+        <div className={styles.box}>
+          <h3>Add Noise</h3>
+
+          <label>
+            <input
+              type="checkbox"
+              checked={noise.baseline}
+              onChange={(e) =>
+                setNoise({ ...noise, baseline: e.target.checked })
+              }
+            />
+            Baseline Wander
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              checked={noise.powerline}
+              onChange={(e) =>
+                setNoise({ ...noise, powerline: e.target.checked })
+              }
+            />
+            Powerline (50 Hz)
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              checked={noise.emg}
+              onChange={(e) => setNoise({ ...noise, emg: e.target.checked })}
+            />
+            EMG Noise
+          </label>
+          <div className={styles.buttonContainer}>
+            <button type="button" onClick={() => noiseTrigger()}>
+              Add Noise to Signal
+            </button>
+          </div>
         </div>
 
         {/* Algorithm Setup */}

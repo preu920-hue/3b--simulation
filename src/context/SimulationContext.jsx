@@ -17,6 +17,13 @@ export const SimulationProvider = ({ children }) => {
   const [generateECG, setGenerateECG] = useState(false);
   const [algoResults, setAlgoResults] = useState(null);
 
+  const [applyNoiseTrigger, setApplyNoiseTrigger] = useState(false);
+  const [noise, setNoise] = useState({
+    baseline: false,
+    powerline: false,
+    emg: false,
+  });
+
   const [rawSamples, setRawSamples] = useState([]);
   const [originalFs, setOriginalFs] = useState(500);
   const [selectedChannels, setSelectedChannels] = useState(["ECG_I"]);
@@ -72,6 +79,8 @@ export const SimulationProvider = ({ children }) => {
         rawSamples, originalFs,
         time, setTime,
         selectedChannels, colors,
+        noise, setNoise,
+        applyNoiseTrigger, setApplyNoiseTrigger,
         algoResults, setAlgoResults,
       }}
     >

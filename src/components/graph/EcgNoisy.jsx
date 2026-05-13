@@ -54,7 +54,6 @@ export const EcgNoisy = () => {
     noise,
     rawSamples,
     selectedChannels,
-    colors,
   } = useContext(SimulationContext);
 
   // toggle when all noise is false
@@ -102,10 +101,10 @@ export const EcgNoisy = () => {
 }, [applyNoiseTrigger, noise, time, originalFs, rawSamples, selectedChannels]);
 
 
-  const datasets = selectedChannels.map((ch, i) => ({
+  const datasets = selectedChannels.map((ch) => ({
     label: ch,
     data: data.map((p) => ({ x: p.x, y: p[ch] })),
-    borderColor: colors[i % colors.length],
+    borderColor: "red",
     borderWidth: 1,
     pointRadius: 0,
     tension: 0,
